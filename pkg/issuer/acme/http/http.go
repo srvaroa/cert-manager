@@ -86,10 +86,28 @@ func NewSolver(ctx *controller.Context) *Solver {
 	}
 }
 
+// copyWithNamespaceOverride will return a challenge with an
+// override namespace for the solver to run in if ACMEOptions specify
+// one as default.
+func (s *Solver) copyWithNamespaceOverride(ch *v1alpha1.Challenge) *v1alpha1.Challenge {
+	namespace := s.ACMEOptions.HTTP01SolverNamespace
+	if len(namespace) > 0 {
+		glog.Infof("Overriding namespace proposed by challenge (%s) in "+
+			"favour of the default one set in config (%s)",
+			ch.Namespace, namespace)
+		ch = ch.DeepCopy()
+		ch.Namespace = namespace
+	}
+	return ch
+}
+
 // Present will realise the resources required to solve the given HTTP01
 // challenge validation in the apiserver. If those resources already exist, it
 // will return nil (i.e. this function is idempotent).
 func (s *Solver) Present(ctx context.Context, issuer v1alpha1.GenericIssuer, ch *v1alpha1.Challenge) error {
+
+	ch = s.copyWithNamespaceOverride(ch)
+
 	_, podErr := s.ensurePod(ch)
 	svc, svcErr := s.ensureService(issuer, ch)
 	if svcErr != nil {

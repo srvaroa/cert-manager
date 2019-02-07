@@ -185,6 +185,7 @@ func buildControllerContext(opts *options.ControllerOptions) (*controller.Contex
 			HTTP01SolverResourceRequestMemory: HTTP01SolverResourceRequestMemory,
 			HTTP01SolverResourceLimitsCPU:     HTTP01SolverResourceLimitsCPU,
 			HTTP01SolverResourceLimitsMemory:  HTTP01SolverResourceLimitsMemory,
+			HTTP01SolverNamespace:             opts.ACMEHTTP01SolverNamespace,
 			DNS01CheckAuthoritative:           !opts.DNS01RecursiveNameserversOnly,
 			DNS01Nameservers:                  nameservers,
 		},

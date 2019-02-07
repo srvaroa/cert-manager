@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+	"github.com/jetstack/cert-manager/pkg/controller"
 )
 
 // countReachabilityTestCalls is a wrapper function that allows us to count the number
@@ -100,5 +101,50 @@ func TestCheck(t *testing.T) {
 				return
 			}
 		})
+	}
+}
+
+func TestCopyWIthNamespaceOverride(t *testing.T) {
+	type testT struct {
+		defaultNs    string
+		challengeNs  string
+		shouldMutate bool
+	}
+
+	tests := []testT{
+		{
+			defaultNs:    "default-namespace",
+			challengeNs:  "challenge-namespace",
+			shouldMutate: true,
+		},
+		{
+			defaultNs:    "",
+			challengeNs:  "challenge-namespace",
+			shouldMutate: false,
+		},
+	}
+
+	for _, i := range tests {
+
+		originalCh := &v1alpha1.Challenge{}
+
+		s := &Solver{
+			Context: &controller.Context{
+				ACMEOptions: controller.ACMEOptions{
+					HTTP01SolverNamespace: i.defaultNs,
+				},
+			},
+		}
+
+		originalCh.Namespace = i.challengeNs
+
+		newCh := s.copyWithNamespaceOverride(originalCh)
+
+		if i.shouldMutate && i.defaultNs != newCh.Namespace {
+			t.Errorf("Expected namespace to be changed to %s", i.defaultNs)
+		} else if !i.shouldMutate && i.challengeNs != newCh.Namespace {
+			t.Errorf("Expected namespace to be untouched as %s", i.challengeNs)
+		}
+
 	}
 }

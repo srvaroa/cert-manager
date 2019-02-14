@@ -14,7 +14,7 @@
 
 # Set DOCKER_REPO to customise the image docker repo, e.g. "quay.io/jetstack"
 DOCKER_REPO :=
-APP_VERSION := canary
+APP_VERSION := v0.6.0-overridens
 HACK_DIR ?= hack
 
 GINKGO_SKIP :=
